@@ -1,2 +1,10 @@
 # Molecular_Descriptor
-The purpose of this directory is to contains my program for the AP Computer Science Principles performance task
+A data science app made in Python
+Usage: Calculate the molecular descriptor of molecules
+
+Library:
+* Streamlit: GUI
+* Rdkit: Chemicals' properties calculation
+* Numpy: Sciencetific calculation an array
+* Pandas: Dataframe
+ 
