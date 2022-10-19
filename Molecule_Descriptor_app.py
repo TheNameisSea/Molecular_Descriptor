@@ -43,6 +43,18 @@ def generateDescriptors(smiles, verbose=False):
 
     return descriptors
 
+def drawSmiles(smiles_list):
+    molecular_models = [Chem.MolFromSmiles(x) for x in smiles_list]
+    for m in range(len(molecular_models)):
+        try:
+            fig = Draw.MolToMPL(molecular_models[m])
+        except:
+            fig = "An exception occured"
+        st.write({SMILES[m]}:")
+        st.write("Molecular Model:")
+        st.write(fig)
+        st.write("")
+
 #-------------------- Main --------------------#
 
 st.set_page_config(page_title="Molecular Descriptors", page_icon="🔬", layout="centered", initial_sidebar_state="expanded", menu_items=None)
@@ -65,10 +77,14 @@ SMILES = SMILES.split('\n')
 st.header('Input SMILES')
 st.write(SMILES) 
 
-## Calculate molecular descriptors
+# Calculate molecular descriptors
 st.header('Computed molecular descriptors')
 try:
     X = generateDescriptors(SMILES)
     st.write(X) # Skips the dummy first item
 except:
     st.write("Invalid SMILES")
+
+# Draw the molecule     
+st.header('Molecular model')
+drawSmiles(SMILES)
