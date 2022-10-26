@@ -112,7 +112,7 @@ st.sidebar.header('User Input Features')
 # Read SMILES input
 SMILES_input = "CC(=O)OC1=CC=CC=C1C(=O)O\nC(C(=O)O)C(CC(=O)O)(C(=O)O)O\nC1=CC=C(C=C1)N"
 
-SMILES = st.sidebar.text_area("SMILES input", SMILES_input)     
+SMILES = st.sidebar.text_area("Input SMILES", SMILES_input)     
 SMILES = SMILES.split('\n')
 
 st.header('Input SMILES')
@@ -129,4 +129,3 @@ except:
 # Draw the molecule
 st.header('Molecular model')
 drawSmiles(SMILES)
-
