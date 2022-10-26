@@ -1,14 +1,25 @@
 #-------------------- Imports --------------------#
 
-import streamlit as st
-import pandas as pd
-import numpy as np
-from rdkit import Chem
+import streamlit as st      # For deploying the program as a web app
+import pandas as pd     # For working with dataframes
+import numpy as np      # For working with arrays
+from rdkit import Chem      # Chemical properties calculation
+from rdkit.Chem import Draw
 from rdkit.Chem import Descriptors
 from rdkit.Chem import rdMolDescriptors
+import requests     # For web scraping 
+
+
+#-------------------- CONST --------------------#
+
+CACTUS = "https://cactus.nci.nih.gov/chemical/structure/{0}/{1}"        # Link of the CACTUS website - a website that contains chemical stuff
+
 
 #-------------------- Custom Functions --------------------#
 
+# Function created based on:
+#   dataprofessor (2020) solubility-app [Source code]. https://github.com/dataprofessor/solubility-app
+# Added new algorithms compared to the source code to calculate: the H-bond acceptor, the H-bond donor and the Carbon proportion of the molecule 
 def generateDescriptors(smiles, verbose=False):
     molecule_data= []      # A list for storing inputed molecules
     carbon = np.zeros(len(smiles))      # A list for storing the number of carbon in each molecule
@@ -61,18 +72,29 @@ def generateDescriptors(smiles, verbose=False):
 
     return descriptors
 
+#   Oliver Scott (2020) <answer for a question on stackoverflow>. https://stackoverflow.com/questions/64329049/converting-smiles-to-chemical-name-or-iupac-name-using-rdkit-or-other-python-mod
+def smiles_to_iupac(smiles):
+    rep = "iupac_name"      # Add this into the link after the molecule descriptor to find its iupac name on the website
+    try:
+        url = CACTUS.format(smiles, rep)    # Create an url from the CACTUS link, the smiles of the molecule with /iupac_name at the end 
+        response = requests.get(url)        # Request data from the created url
+        response.raise_for_status()     # Check for errors
+        return response.text        # Return the response in unicode
+    except:
+        return "Unknown Molecule" 
 
 def drawSmiles(smiles_list):
-    molecular_models = [Chem.MolFromSmiles(x) for x in smiles_list]
-    for m in range(len(molecular_models)):
+    molecular_models = [Chem.MolFromSmiles(x) for x in smiles_list]     # Create a list of molecules from the inputed smiles
+    for m in range(len(molecular_models)):      
         try:
-            fig = Draw.MolToMPL(molecular_models[m])
+            fig = Draw.MolToMPL(molecular_models[m])        # Create a figure of the molecule
+            st.write(f"{smiles_to_iupac(SMILES[m])}: {SMILES[m]}")      #Print the molecule's iupac name
+            st.write("Molecular Model:")
+            st.write(fig)       # Print the figure
+            st.write("")
         except:
-            fig = "An exception occured"
-        st.write({SMILES[m]}:")
-        st.write("Molecular Model:")
-        st.write(fig)
-        st.write("")
+            st.write("An exception occured")
+
 
 #-------------------- Main --------------------#
 
@@ -87,10 +109,10 @@ This app calculates the **Molecular Descriptors** values of molecules!
 # Input molecules (Side Panel)
 st.sidebar.header('User Input Features')
 
-## Read SMILES input
+# Read SMILES input
 SMILES_input = "CC(=O)OC1=CC=CC=C1C(=O)O\nC(C(=O)O)C(CC(=O)O)(C(=O)O)O\nC1=CC=C(C=C1)N"
 
-SMILES = st.sidebar.text_area("SMILES input", SMILES_input)
+SMILES = st.sidebar.text_area("SMILES input", SMILES_input)     
 SMILES = SMILES.split('\n')
 
 st.header('Input SMILES')
@@ -100,10 +122,11 @@ st.write(SMILES)
 st.header('Computed molecular descriptors')
 try:
     X = generateDescriptors(SMILES)
-    st.write(X) # Skips the dummy first item
+    st.write(X)
 except:
     st.write("Invalid SMILES")
 
-# Draw the molecule     
+# Draw the molecule
 st.header('Molecular model')
 drawSmiles(SMILES)
+
