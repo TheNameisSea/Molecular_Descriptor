@@ -32,7 +32,7 @@ def generateDescriptors(smiles, verbose=False):
                 carbon[smiles.index(element)] += 1
 
     baseData = np.zeros(1)    # Create a base numpy array
-    num_smiles = 0     # I is for recording the number of SMILES inputed
+    num_smiles = 0     # This is for recording the number of smiles processed
     
     for mol in molecule_data:
         aromatic_atoms = []     # A list for storing aromatic atoms in a molecule
