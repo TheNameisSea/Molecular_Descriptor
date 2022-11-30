@@ -4,6 +4,6 @@ A data science app made in Python. Usage: Calculate the molecular descriptor of 
 Library:
 * Streamlit: GUI
 * Rdkit: Chemicals' properties calculation
-* Numpy: Sciencetific calculation an array
+* Numpy: Sciencetific calculation and array
 * Pandas: Dataframe
  
