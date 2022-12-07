@@ -83,6 +83,7 @@ def smiles_to_iupac(smiles):
     except:
         return "Unknown Molecule" 
 
+#   Self-made function 
 def drawSmiles(smiles_list):
     molecular_models = [Chem.MolFromSmiles(x) for x in smiles_list]     # Create a list of molecules from the inputed smiles
     for m in range(len(molecular_models)):      
