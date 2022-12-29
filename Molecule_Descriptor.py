@@ -1,3 +1,9 @@
+#-------------------- General Info --------------------#
+# Project name: Molecular Descriptor app
+# Author: Do Chi Hai - github: https://github.com/TheNameisSea
+# Functions: Calculate the molecular descriptors of molecules, draw 2d/3d models of molecules
+# Github: https://github.com/TheNameisSea/Molecular_Descriptor.git
+
 #-------------------- Imports --------------------#
 
 import streamlit as st      # For deploying the program as a web app
