@@ -14,11 +14,9 @@ from rdkit.Chem import Draw
 from rdkit.Chem import Descriptors
 from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem.Draw import rdMolDraw2D
-from stmol import showmol
-import py3Dmol
 from rdkit.Chem import AllChem
-import requests     # For web scraping 
-
+from stmol import showmol       # For displaying the 3d model of molecules
+import py3Dmol      # For displaying the 3d model of molecules
 
 #-------------------- CONST --------------------#
 
@@ -49,13 +47,13 @@ def generateDescriptors(smiles, verbose=False):
         for atom in range(mol.GetNumAtoms()):
             aromatic_atoms.append(mol.GetAtomWithIdx(atom).GetIsAromatic())       # Get a list of aromatic atoms in the molecule
         aromatic_count = 0
-        for i in aromatic_atoms:
+        for i in aromatic_atoms:        # Count the number of aromatic ring
             if i==True:
                 aromatic_count += 1
         HeavyAtom = Descriptors.HeavyAtomCount(mol)     # Calculate the number of heavy atom
         AromaticProportion = aromatic_count/HeavyAtom       # Calculate the aromatic proportion
 
-        LogPoctanol = Descriptors.MolLogP(mol)     # Calculate the partition coefficient or octanol
+        LogPoctanol = Descriptors.MolLogP(mol)     # Calculate the partition coefficient
         MolecularWeight = Descriptors.MolWt(mol)     # Calculate the molecule's weight
         RotatableBonds = Descriptors.NumRotatableBonds(mol)     # Calculate the number of non-ring bond in the molecule
         CarbonProportion = carbon[molecule_data.index(mol)] / (len(smiles[molecule_data.index(mol)]) + 1)     # Calculate the carbon proportion 
@@ -77,43 +75,39 @@ def generateDescriptors(smiles, verbose=False):
             baseData=np.vstack([baseData, features])     # If there are > 1 inputed molecule then add the calculated values as the next row of the array
         num_smiles += 1
 
-    columnNames=["LogPoctanol","Molecular Weight","Rotatable Bonds","Aromatic Proportion", "Carbon Proportion","H-bond donor count", "H-bond acceptor count"]       # Columns name for pandas dataframe
+    # Columns name for pandas dataframe
+    columnNames=["LogPoctanol","Molecular Weight","Rotatable Bonds","Aromatic Proportion", "Carbon Proportion","H-bond donor count", "H-bond acceptor count"]
     descriptors = pd.DataFrame(data=baseData,columns=columnNames)       # Return the molecule's descriptor as a dataframe 
 
     return descriptors
 
-#   Oliver Scott (2020) <answer to a question on stackoverflow>. https://stackoverflow.com/questions/64329049/converting-smiles-to-chemical-name-or-iupac-name-using-rdkit-or-other-python-mod
-def smiles_to_iupac(smiles):
-    rep = "iupac_name"      # Add this into the link after the molecule descriptor to find its iupac name on the website
-    try:
-        url = CACTUS.format(smiles, rep)    # Create an url from the CACTUS link, the smiles of the molecule with /iupac_name at the end 
-        response = requests.get(url)        # Request data from the created url
-        response.raise_for_status()     # Check for errors
-        return response.text        # Return the response in unicode
-    except:
-        return "Unknown Molecule" 
-
 def mol_with_atom_index(mol):
-    for atom in mol.GetAtoms():     # Get atoms
+    for atom in mol.GetAtoms():     # Get atoms in the inputed molecule
         atom.SetAtomMapNum(atom.GetIdx())       #Get index of atoms
     return mol
 
 def displaySmiles(smiles_list, include_index):
     molecular_models = [Chem.MolFromSmiles(x) for x in smiles_list]     # Get smiles list
     if include_index:
-        for m in range(len(molecular_models) - 1):      # len must -1 for skipping the 1st dummy item
-            fig = Draw.MolToMPL(mol_with_atom_index(molecular_models[m+1]))     # Draw molecule with index as matplotlib fig, index must +1 for skipping the 1st dummpy item
-            st.write(f"{smiles_to_iupac(smiles_list[m+1])}: {smiles_list[m+1]}")      # Print iupac name and smiles
-            st.write("Molecular Model:")
-            st.write(fig)       
-            st.write("")        # Spaces for the aestheticity:)))
+        for mol in molecular_models:      
+            if molecular_models.index(mol) == 0:        # Skip the 1st dummy item
+                continue
+            else:
+                fig = Draw.MolToMPL(mol_with_atom_index(mol))     # Draw molecule with index as matplotlib fig
+                st.write(f"{smiles_list[molecular_models.index(mol)]}")     # Print the smiles
+                st.write("Molecular Model:")
+                st.write(fig)           # Display the model
+                st.write("")        # Spaces for the aestheticity:)))
     else:
-         for m in range(len(molecular_models) - 1):
-            fig = Draw.MolToMPL((molecular_models[m+1]))
-            st.write(f"{smiles_to_iupac(smiles_list[m+1])}: {smiles_list[m+1]}")
-            st.write("Molecular Model:")
-            st.write(fig)
-            st.write("") 
+         for mol in molecular_models:
+            if molecular_models.index(mol) == 0:
+                continue
+            else:
+                fig = Draw.MolToMPL(mol)
+                st.write(f"{smiles_list[molecular_models.index(mol)]}")     # Print the smiles
+                st.write("Molecular Model:")
+                st.write(fig)
+                st.write("") 
 
 #   napoles-uach (2021) Medium_Mol (app4) [Source code]. https://github.com/napoles-uach/Medium_Mol
 def render_mol(smi):
@@ -131,6 +125,7 @@ def render_mol(smi):
 
 #-------------------- Main --------------------#
 
+# Page config
 st.set_page_config(page_title="Molecular Descriptors", page_icon="🔬", layout="centered", initial_sidebar_state="expanded", menu_items=None) 
 
 # Page Title
@@ -168,11 +163,14 @@ except:
 
 # Draw the molecule
 
-if display and multidimensional:
+if display and multidimensional:        # Check if the user want to have both the 2d and 3d model
     st.header('Molecular model')
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)      # Seperate the screen into 2 columns
     with col1:
-        displaySmiles(SMILES, include_index)        # Display 2d models
+        if include_index:   # Check if the user want to include index in the model
+            displaySmiles(SMILES, True)
+        else:
+            displaySmiles(SMILES, False)       # Display 2d models
     with col2:
         for smiles in SMILES[1:]:
             if SMILES.index(smiles) == 1:
@@ -189,6 +187,9 @@ if display and multidimensional:
                 st.write("")
 
             st.write(render_mol(smiles))        # Display 3d models
-elif display:
+elif display:       # Check if the user want to see the 2d model
     st.header('Molecular model')
-    displaySmiles(SMILES, include_index)
+    if include_index:   # Check if the user want to include index in the model
+        displaySmiles(SMILES, True)
+    else:
+        displaySmiles(SMILES, False)       # Display 2d models
