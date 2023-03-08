@@ -186,7 +186,7 @@ if display and multidimensional:        # Check if the user want to have both th
                 st.write("") 
                 st.write("")
 
-            st.write(render_mol(smiles))        # Display 3d models
+            render_mol(smiles)       # Display 3d models
 elif display:       # Check if the user want to see the 2d model
     st.header('Molecular model')
     if include_index:   # Check if the user want to include index in the model
