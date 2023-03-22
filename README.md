@@ -1,5 +1,5 @@
 # Molecular_Descriptor
-A data science app made in Python. Usage: Calculate the molecular descriptor and predict the molecular structure of the molecule from it formula (written in the SMILES format) 
+A data science app made in Python. Usage: Calculate the molecular descriptor and predict the molecular structure of the molecule from its formula (written in the SMILES format) 
 
 Library:
 * Streamlit: GUI
